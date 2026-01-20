@@ -1,0 +1,25 @@
+  /* MUESTRA (...) CUANDO LA INFORMACION EXEDE DE COLUMNA */
+  .truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+  }
+
+  .icon-benef {
+    font-size: 17px;
+    /* dimensione grande e leggibile */
+    color: #646d7a;
+    /* colore amichevole, verde */
+  }
+
+  .icon-apadr {
+    font-size: 17px;
+    /* dimensione grande e leggibile */
+    color: #609ce9;
+    /* colore amichevole, verde */
+  }
+
+  .font-text {
+    font-family: 'Roboto', sans-serif;
+  }

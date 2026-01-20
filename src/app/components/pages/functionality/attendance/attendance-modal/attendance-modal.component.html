@@ -1,0 +1,60 @@
+<div *ngIf="isModalOpen" class="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50 z-50">
+  <div class="bg-white rounded-lg w-96 shadow-lg overflow-hidden">
+
+    <!-- Header del modal -->
+    <div class="bg-blue-600 text-white px-6 py-4 rounded-t-lg">
+      <h2 class="text-xl font-semibold">
+        {{ isEditMode ? '✏️ Editar Asistencia' : '➕ Agregar Asistencia' }}
+      </h2>
+    </div>
+
+    <!-- Contenido del formulario -->
+    <div class="p-6">
+      <form (ngSubmit)="saveAttendance()">
+        <!-- Tema -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700" for="issueId">Tema</label>
+          <select class="border p-2 w-full rounded mt-1" id="issueId" [(ngModel)]="selectedIssueId" name="issueId" required>
+            <option *ngFor="let issue of issueList" [value]="issue.id">{{ issue.name }} - {{ issue.sesion }}</option>
+          </select>
+        </div>
+
+        <!-- Persona -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700" for="personId">Persona</label>
+          <select class="border p-2 w-full rounded mt-1" id="personId" [(ngModel)]="selectedPersonId" name="personId" required>
+            <option *ngFor="let person of personList" [value]="person.idPerson">
+              {{ person.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Hora de llegada -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700" for="entryTime">Hora de llegada</label>
+          <input class="border p-2 w-full rounded mt-1 bg-gray-100 cursor-not-allowed" id="entryTime" name="entryTime"
+            [(ngModel)]="entryTime" type="datetime-local" readonly required>
+        </div>
+
+        <!-- Justificación (solo en edición) -->
+        <div *ngIf="isEditMode" class="mb-4">
+          <label class="block text-sm font-medium text-gray-700" for="justificationDocument">Documento de Justificación</label>
+          <input class="border p-2 w-full rounded mt-1" id="justificationDocument" type="file" (change)="onFileChange($event)" accept="image/*" />
+
+          <!-- Vista previa -->
+          <div *ngIf="previewImage" class="mt-2">
+            <img [src]="previewImage" alt="Vista previa de la imagen" class="w-full h-auto rounded-md" />
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex justify-end pt-4">
+          <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded mr-2 hover:bg-gray-600" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            {{ isEditMode ? 'Actualizar' : 'Agregar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

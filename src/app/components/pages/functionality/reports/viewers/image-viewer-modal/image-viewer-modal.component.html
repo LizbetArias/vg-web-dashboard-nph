@@ -1,0 +1,65 @@
+<!-- Modal de visualización de imágenes -->
+<div *ngIf="showViewer" class="fixed inset-0 z-[99999] overflow-hidden" aria-labelledby="image-viewer" role="dialog"
+    aria-modal="true" (click)="closeViewer()">
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+
+        <!-- Overlay -->
+        <div class="absolute inset-0 bg-black bg-opacity-95 transition-opacity duration-300" aria-hidden="true"></div>
+
+        <!-- Contenido del visor -->
+        <div class="relative z-10 max-w-[95vw] max-h-[95vh] flex flex-col items-center"
+            (click)="$event.stopPropagation()">
+
+            <!-- Botón cerrar -->
+            <button type="button" (click)="closeViewer()" class="absolute -top-2 -right-20 text-white bg-black bg-opacity-50 rounded-full p-3 
+                     hover:bg-opacity-70 transition-all duration-200 z-20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <!-- Imagen principal -->
+            <div class="relative">
+                <img [src]="currentImageUrl" alt="Imagen ampliada"
+                    class="max-w-full max-h-[70vh] w-auto h-auto rounded-lg shadow-2xl object-contain">
+
+                <!-- Controles de navegación -->
+                <div class="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+                    <button *ngIf="currentImageIndex > 0" type="button" (click)="prevImage()" class="pointer-events-auto bg-black bg-opacity-50 text-white rounded-full p-3 
+                         hover:bg-opacity-70 transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <button *ngIf="currentImageIndex < images.length - 1" type="button" (click)="nextImage()" class="pointer-events-auto bg-black bg-opacity-50 text-white rounded-full p-3 
+                         hover:bg-opacity-70 transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Miniaturas -->
+            <div class="mt-6 flex justify-center space-x-2 overflow-x-auto pb-4 max-w-full custom-scrollbar">
+                <button *ngFor="let image of images; let i = index" type="button" (click)="viewImage(i)" class="flex items-center justify-center h-20 w-20 flex-shrink-0 bg-primary-10 dark:bg-gray-800 rounded-lg overflow-hidden
+                       transition-all duration-200 border-2" [ngClass]="{
+                  'border-blue-500': currentImageIndex === i,
+                  'border-gray-300 dark:border-gray-600': currentImageIndex !== i
+                }">
+                    <img [src]="getImagePreview(image)" alt="Miniatura" class="max-w-full max-h-full object-contain">
+                </button>
+            </div>
+
+            <!-- Contador de imágenes -->
+            <div class="mt-4 text-center">
+                <span class="bg-black bg-opacity-50 text-white px-4 py-2 rounded-full text-sm font-medium">
+                    {{ currentImageIndex + 1 }} de {{ images.length }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

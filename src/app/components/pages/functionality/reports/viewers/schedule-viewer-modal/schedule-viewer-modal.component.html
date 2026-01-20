@@ -1,0 +1,39 @@
+<!-- Modal de visualización del cronograma - RENDERIZADO EN BODY -->
+<div *ngIf="showViewer" class="schedule-viewer-modal fixed inset-0 overflow-hidden" style="z-index: 99999;"
+    aria-labelledby="schedule-viewer" role="dialog" aria-modal="true" (click)="closeViewer()">
+
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <!-- Fondo oscuro con mayor z-index -->
+        <div class="fixed inset-0 bg-black bg-opacity-95 transition-opacity duration-300" style="z-index: 99998;"
+            aria-hidden="true"></div>
+
+        <!-- Contenido del visor -->
+        <div class="relative flex flex-col items-center max-w-[98vw] max-h-[98vh]" style="z-index: 99999;"
+            (click)="$event.stopPropagation()">
+
+            <!-- Botón cerrar -->
+            <button type="button" (click)="closeViewer()" class="absolute -top-16 -right-10 text-white bg-black bg-opacity-60 p-3
+                            hover:bg-opacity-80 transition-all duration-200 z-50 backdrop-blur-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <!-- Imagen del cronograma  -->
+            <div class="relative flex items-center justify-center w-full h-full">
+                <img [src]="preview" alt="Cronograma"
+                    class="max-w-[80vw] max-h-[70vh] rounded-xl shadow-xl object-contain border-2 border-white/20">
+            </div>
+
+            <!-- Título -->
+            <div class="mt-6 text-center">
+                <!-- DESPUÉS -->
+                <span class="bg-black bg-opacity-60 text-white px-6 py-3 text-sm font-medium
+                        backdrop-blur-sm">
+                    Cronograma del Reporte
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

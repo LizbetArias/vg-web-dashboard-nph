@@ -1,0 +1,221 @@
+<div class="container-fluid pt-4">
+  <div class="dashboard-container">
+    <!-- Header section with elegant design -->
+    <div class="header-section">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <div class="title-container">
+            <h1 class="main-title">Plan de Prácticas Parentales</h1>
+            <div class="subtitle">Transformando familias a través de prácticas efectivas</div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="date-container">
+            <div class="calendar-icon">
+              <i class="bi bi-calendar-week"></i>
+            </div>
+            <div class="date-info">
+              <div class="date-label">Semana actual</div>
+              <div class="current-date">{{ currentDate | date:'dd MMMM, yyyy' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action bar with filters and buttons -->
+    <div class="action-bar">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-4">
+          <div class="search-box">
+            <i class="bi bi-search search-icon"></i>
+            <select #sessionFilter id="sessionFilter" class="form-select custom-select" 
+                    (change)="onSessionFilterChange(sessionFilter.value || null)">
+              <option value="">Todas las sesiones</option>
+              <option *ngFor="let session of sessions" [value]="session.id">{{session.name}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="status-toggle">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="showInactive" 
+                    [checked]="showInactive" (change)="toggleShowInactive()">
+              <label class="form-check-label" for="showInactive">
+                <i class="bi bi-eye"></i> Mostrar planes suspendidos
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 text-end">
+          <button class="btn btn-create" (click)="openModal()">
+            <i class="bi bi-plus-circle-fill me-2"></i> Crear Nuevo Plan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plans section with card design -->
+    <div class="plans-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="bi bi-clipboard-check me-2"></i>Planes de Prácticas Parentales
+          <span class="plan-count">{{ filteredPlans.length }} planes</span>
+        </h2>
+      </div>
+
+      <!-- Empty state when no plans available -->
+      <div *ngIf="!loading && filteredPlans.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-clipboard"></i>
+        </div>
+        <h3>No hay planes disponibles</h3>
+        <p>No se encontraron planes de prácticas parentales con los filtros actuales.</p>
+        <button class="btn btn-create-empty" (click)="openModal()">
+          <i class="bi bi-plus-circle me-2"></i> Crear primer plan
+        </button>
+      </div>
+
+      <!-- Loading indicator -->
+      <div *ngIf="loading" class="loading-container">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p>Cargando planes...</p>
+      </div>
+
+      <!-- Weekly plan cards display -->
+      <div class="plans-grid" *ngIf="!loading && filteredPlans.length > 0">
+        <div *ngFor="let plan of filteredPlans" class="plan-card" [class.inactive-plan]="plan.generalStatus === 'SUSPENDED'">
+          <!-- Status badge -->
+          <div class="status-badge" [class.active]="plan.generalStatus === 'ACTIVE'" [class.suspended]="plan.generalStatus === 'SUSPENDED'">
+            <i class="bi" [ngClass]="{'bi-check-circle-fill': plan.generalStatus === 'ACTIVE', 'bi-x-circle-fill': plan.generalStatus === 'SUSPENDED'}"></i>
+            {{ plan.generalStatus === 'ACTIVE' ? 'ACTIVO' : 'SUSPENDIDO' }}
+          </div>
+          
+          <!-- Plan header with meta information -->
+          <div class="plan-card-header">
+            <div class="session-badge">{{ getSessionName(plan.sessionId) }}</div>
+            <div class="plan-dates">
+              <div class="date-item">
+                <i class="bi bi-calendar3"></i>
+                <span>{{ plan.startDate | date:'dd MMM, yyyy' }}</span>
+              </div>
+              <div class="prepared-item">
+                <i class="bi bi-person-circle"></i>
+                <span>{{ plan.preparedBy }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Weekly plan display -->
+          <div class="weekly-plan-container">
+            <!-- Day headers -->
+            <div class="days-header">
+              <div class="corner-cell"></div>
+              <div class="day-cell">Lunes</div>
+              <div class="day-cell">Martes</div>
+              <div class="day-cell">Miércoles</div>
+              <div class="day-cell">Jueves</div>
+              <div class="day-cell">Viernes</div>
+            </div>
+            
+            <!-- Topic row -->
+            <div class="plan-row">
+              <div class="label-cell topic-label">Tema</div>
+              <div class="content-cell" *ngFor="let _ of [1, 2, 3, 4, 5]">{{ plan.topic || 'No especificado' }}</div>
+            </div>
+            
+            <!-- Objective row -->
+            <div class="plan-row">
+              <div class="label-cell objective-label">Objetivo</div>
+              <div class="content-cell" *ngFor="let _ of [1, 2, 3, 4, 5]">{{ plan.objective || 'No especificado' }}</div>
+            </div>
+            
+            <!-- Goal row -->
+            <div class="plan-row">
+              <div class="label-cell goal-label">Meta</div>
+              <div class="content-cell" *ngFor="let _ of [1, 2, 3, 4, 5]">{{ plan.goal || 'No especificado' }}</div>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="plan-card-actions">
+            <button class="btn btn-edit" (click)="editPlan(plan)" *ngIf="plan.generalStatus === 'ACTIVE'">
+              <i class="bi bi-pencil-fill me-1"></i> Editar
+            </button>
+            <button class="btn btn-suspend" (click)="confirmSuspendPlan(plan)" *ngIf="plan.generalStatus === 'ACTIVE'">
+              <i class="bi bi-pause-fill me-1"></i> Suspender
+            </button>
+            <button class="btn btn-restore" (click)="confirmRestorePlan(plan)" *ngIf="plan.generalStatus === 'SUSPENDED'">
+              <i class="bi bi-arrow-clockwise me-1"></i> Restaurar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for creating/editing plans -->
+    <div class="modal fade" [ngClass]="{'show': showModal}" [style.display]="showModal ? 'block' : 'none'" tabindex="-1"
+          role="dialog" aria-labelledby="planModalLabel" [attr.aria-hidden]="!showModal" (click)="closeModalOnBackdrop($event)">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header" [ngClass]="{'bg-primary text-white': isEditMode, 'bg-success text-white': !isEditMode}">
+            <h5 class="modal-title" id="planModalLabel">{{ isEditMode ? 'Editar Plan de Prácticas Parentales' : 'Nuevo Plan de Prácticas Parentales' }}</h5>
+            <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()" [ngClass]="{'btn-close-white': true}"></button>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="planForm" (ngSubmit)="onSubmit()" class="row g-3">
+              <div class="col-md-6">
+                <label for="sessionId" class="form-label">Sesión <span class="text-danger">*</span></label>
+                <select id="sessionId" formControlName="sessionId" class="form-select" 
+                        [class.is-invalid]="planForm.get('sessionId')?.invalid && planForm.get('sessionId')?.touched">
+                  <option value="" disabled>Seleccione una sesión</option>
+                  <option *ngFor="let session of sessions" [value]="session.id">{{session.name}}</option>
+                </select>
+                <div class="invalid-feedback" *ngIf="planForm.get('sessionId')?.invalid && planForm.get('sessionId')?.touched">
+                  La sesión es requerida
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="startDate" class="form-label">Fecha de inicio</label>
+                <input type="date" id="startDate" formControlName="startDate" class="form-control">
+              </div>
+              <div class="col-md-6">
+                <label for="preparedBy" class="form-label">Preparado por</label>
+                <input type="text" id="preparedBy" formControlName="preparedBy" class="form-control" 
+                        [class.is-invalid]="planForm.get('preparedBy')?.invalid && planForm.get('preparedBy')?.touched">
+                <div class="invalid-feedback" *ngIf="planForm.get('preparedBy')?.errors?.['maxlength']">
+                  El campo no debe exceder 100 caracteres
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="topic" class="form-label">Tema</label>
+                <input type="text" id="topic" formControlName="topic" class="form-control"
+                        [class.is-invalid]="planForm.get('topic')?.invalid && planForm.get('topic')?.touched">
+                <div class="invalid-feedback" *ngIf="planForm.get('topic')?.errors?.['maxlength']">
+                  El campo no debe exceder 200 caracteres
+                </div>
+              </div>
+              <div class="col-md-12">
+                <label for="objective" class="form-label">Objetivo</label>
+                <textarea id="objective" formControlName="objective" class="form-control" rows="3"></textarea>
+              </div>
+              <div class="col-md-12">
+                <label for="goal" class="form-label">Meta</label>
+                <textarea id="goal" formControlName="goal" class="form-control" rows="3"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="button" class="btn btn-primary" (click)="onSubmit()">{{ isEditMode ? 'Actualizar' : 'Guardar' }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal backdrop -->
+    <div class="modal-backdrop fade" [ngClass]="{'show': showModal}" *ngIf="showModal"></div>
+  </div>
+</div>

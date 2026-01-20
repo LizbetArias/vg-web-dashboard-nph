@@ -1,0 +1,197 @@
+<!-- Modal -->
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
+  <div class="bg-white rounded-lg max-w-2xl w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+    <div class="relative -mx-4 -mt-4 mb-6 rounded-t-lg overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-500 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="5" width="18" height="14" rx="2" class="stroke-white" />
+            <path d="M16 3v4M8 3v4" class="stroke-white"/>
+          </svg>
+          <h3 class="text-lg font-bold text-white tracking-wide">
+            {{ workshop ? 'Editar Taller' : 'Nuevo Taller' }}
+          </h3>
+        </div>
+        <button (click)="onCancel()" class="text-white hover:text-gray-200 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="space-y-2">
+      <!-- Nombre -->
+      <div class="space-y-2">
+  <label for="name" class="block text-sm font-medium text-gray-700">
+    Nombre <span class="text-red-500">*</span>
+  </label>
+  <input type="text" id="name" name="name" [(ngModel)]="formData.name" placeholder="Nombre del taller"
+    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+    required (input)="allowOnlyLettersName($event)" />
+  <div *ngIf="formSubmitted && !formData.name" class="text-xs text-red-600 mt-1 ml-1">
+    Este campo es obligatorio.
+  </div>
+</div>
+
+      <!-- Descripción -->
+      <div class="space-y-2">
+        <label for="description" class="block text-sm font-medium text-gray-700">Descripción</label>
+        <textarea id="description" name="description" [(ngModel)]="formData.description"
+  placeholder="Descripción del taller (opcional)" rows="2"
+  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+  (input)="allowOnlyLetters($event)"></textarea>
+      </div>
+
+      <!-- Agrega esto antes de la lista de personas -->
+      <div class="mb-4">
+        <label class="block text-sm font-semibold text-gray-700 mb-1">
+          Personas <span class="text-red-500">*</span>
+        </label>
+        <div class="border border-gray-200 rounded-md bg-gray-50 shadow-sm">
+          <!-- Filtro dentro del cuadro -->
+          <div class="flex items-center gap-2 px-2 py-2 border-b border-gray-100 bg-gray-100 rounded-t-md">
+            <span class="text-xs text-gray-600 font-medium">Parentesco:</span>
+            <select name="typeKinshipFilter" [(ngModel)]="typeKinshipFilter" (change)="onKinshipFilterChange()"
+              class="px-2 py-1 border border-gray-300 rounded bg-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Todos</option>
+              <option *ngFor="let kin of kinshipTypes" [value]="kin">
+                {{ kin }}
+              </option>
+            </select>
+          </div>
+          <!-- Lista de personas -->
+          <div class="max-h-40 overflow-y-auto p-2">
+            <ng-container *ngIf="filteredPersonList.length; else noPerson">
+              <div *ngFor="let person of filteredPersonList"
+                class="flex items-center py-1 px-2 rounded hover:bg-blue-50 transition">
+                <input type="checkbox" [checked]="selectedPersonIds.includes(person.idPerson)"
+                  (change)="toggleSelection(person.idPerson)"
+                  class="form-checkbox h-4 w-4 text-blue-600 accent-blue-600" />
+                <span class="ml-2 text-xs text-gray-800 truncate">
+                  {{ person.name }}, {{ person.surname }}
+                </span>
+                <span class="ml-auto text-[10px] text-gray-400 italic">
+                  {{ person.typeKinship }}
+                </span>
+              </div>
+            </ng-container>
+            <ng-template #noPerson>
+              <div class="text-xs text-gray-400 text-center py-2">
+                No hay personas para este parentesco.
+              </div>
+            </ng-template>
+          </div>
+          <div *ngIf="formSubmitted && selectedPersonIds.length === 0" class="text-xs text-red-600 mt-1 ml-1">
+  Debe seleccionar al menos una persona.
+</div>
+        </div>
+      </div>
+      <!-- Fechas -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Fecha Inicio -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Fecha de Inicio <span
+              class="text-red-500">*</span></label>
+          <div class="relative">
+            <button type="button" (click)="toggleCalendar('start')"
+              class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <span class="flex items-center">
+                {{ formData.startDate ? formatDate(formData.startDate) : 'Seleccionar fecha' }}
+              </span>
+            </button>
+
+            <!-- Calendario Inicio -->
+            <div *ngIf="showStartDateCalendar"
+              class="absolute bottom-full mb-2 z-10 w-full bg-white shadow-lg rounded-md border border-gray-200 p-2">
+              <div class="flex justify-between items-center mb-2">
+                <button type="button" (click)="previousMonth()" class="p-1 hover:bg-gray-100 rounded-full">«</button>
+                <div class="font-medium">{{ months[currentMonth.getMonth()] }} {{
+                  currentMonth.getFullYear() }}</div>
+                <button type="button" (click)="nextMonth()" class="p-1 hover:bg-gray-100 rounded-full">»</button>
+              </div>
+              <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-500">
+                <div *ngFor="let day of weekdays" class="py-1">{{ day }}</div>
+              </div>
+              <div class="grid grid-cols-7 gap-1 mt-1">
+                <button *ngFor="let day of generateCalendarDays(currentMonth)" type="button" [disabled]="day === 0"
+                  (click)="selectDate(day, 'start')"
+                  class="w-8 h-8 rounded-full flex items-center justify-center text-sm" [ngClass]="{
+                        'invisible': day === 0,
+                        'bg-blue-600 text-white hover:bg-blue-700': formData.startDate && day === formData.startDate.getDate() && currentMonth.getMonth() === formData.startDate.getMonth() && currentMonth.getFullYear() === formData.startDate.getFullYear(),
+                        'hover:bg-blue-100': day !== 0
+                      }">
+                  {{ day !== 0 ? day : '' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fecha Fin -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Fecha de Fin <span
+              class="text-red-500">*</span></label>
+          <div class="relative">
+
+            <button type="button" (click)="toggleCalendar('end')"
+              class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <span class="flex items-center">
+                {{ formData.endDate ? formatDate(formData.endDate) : 'Seleccionar fecha' }}
+              </span>
+            </button>
+
+            <!-- Calendario Fin -->
+            <div *ngIf="showEndDateCalendar"
+              class="absolute bottom-full mb-2 z-10 w-full bg-white shadow-lg rounded-md border border-gray-200 p-2">
+              <div class="flex justify-between items-center mb-2">
+                <button type="button" (click)="previousMonth()" class="p-1 hover:bg-gray-100 rounded-full">«</button>
+                <div class="font-medium">{{ months[currentMonth.getMonth()] }} {{
+                  currentMonth.getFullYear() }}</div>
+                <button type="button" (click)="nextMonth()" class="p-1 hover:bg-gray-100 rounded-full">»</button>
+              </div>
+              <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-500">
+                <div *ngFor="let day of weekdays" class="py-1">{{ day }}</div>
+              </div>
+              <div class="grid grid-cols-7 gap-1 mt-1">
+                <button *ngFor="let day of generateCalendarDays(currentMonth)" type="button"
+                  [disabled]="day === 0 || isDateDisabled(day, 'end')" (click)="selectDate(day, 'end')"
+                  class="w-8 h-8 rounded-full flex items-center justify-center text-sm" [ngClass]="{
+                        'invisible': day === 0,
+                        'bg-blue-600 text-white hover:bg-blue-700': formData.endDate && day === formData.endDate.getDate() && currentMonth.getMonth() === formData.endDate.getMonth() && currentMonth.getFullYear() === formData.endDate.getFullYear(),
+                        'hover:bg-blue-100': day !== 0 && !isDateDisabled(day, 'end'),
+                        'text-gray-300 cursor-not-allowed': isDateDisabled(day, 'end')
+                      }">
+                  {{ day !== 0 ? day : '' }}
+                </button>
+              </div>
+              <div *ngIf="formSubmitted && !formData.endDate" class="text-xs text-red-600 mt-1 ml-1">
+  Este campo es obligatorio.
+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Obervación -->
+      <div class="space-y-2">
+        <label for="observation" class="block text-sm font-medium text-gray-700">Observación</label>
+        <textarea id="observation" name="observation" [(ngModel)]="formData.observation"
+          placeholder="Observación del taller (opcional)" rows="2"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex justify-end gap-2">
+        <button type="button" (click)="onCancel()"
+          class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md">
+          Cancelar
+        </button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md"
+          [disabled]="!isFormValid()" [ngClass]="{ 'opacity-50 cursor-not-allowed': !isFormValid() }">
+          {{ workshop ? 'Actualizar' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

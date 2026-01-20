@@ -1,0 +1,77 @@
+<!-- Sección de carga de imágenes -->
+<div class="lg:col-span-2">
+    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Imágenes del Taller <span class="text-red-500">*</span>
+    </label>
+
+    <!-- Contenedor de carga -->
+    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4
+              hover:border-gray-400 dark:hover:border-gray-500 transition-colors duration-200
+              bg-primary-10 dark:bg-gray-700 w-full">
+        <div class="text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-10 w-10 text-gray-400 mb-2" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+
+            <!-- Input para múltiples imágenes -->
+            <input type="file" accept="image/*" multiple (change)="onFilesChange($event)" class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4
+               file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50
+               dark:file:bg-blue-900/50 file:text-blue-700 dark:file:text-blue-300
+               hover:file:bg-blue-100 dark:hover:file:bg-blue-900/70 transition-colors cursor-pointer">
+
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Arrastra archivos o haz clic para seleccionar
+                imágenes</p>
+        </div>
+
+        <!-- Mensaje de error si no hay imágenes -->
+        <div *ngIf="!images || images.length === 0" class="mt-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800
+             rounded-lg p-2 text-red-600 dark:text-red-400 text-sm flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Se requiere al menos una imagen por taller
+        </div>
+    </div>
+
+    <!-- Grid de miniaturas -->
+    <div *ngIf="images && images.length > 0" class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div *ngFor="let image of images; let imgIndex = index" class="relative group border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden
+             bg-primary-10 dark:bg-gray-800 hover:shadow-md transition-all duration-200 cursor-pointer"
+            (click)="openViewer(imgIndex)">
+
+            <!-- Botón eliminar -->
+            <button type="button" (click)="removeImage(imgIndex); $event.stopPropagation()" class="absolute top-2 right-2 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full
+               p-1 w-6 h-6 flex items-center justify-center transition-all duration-200
+               opacity-0 group-hover:opacity-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <!-- Imagen miniatura -->
+            <div class="aspect-square w-full">
+                <img [src]="image.preview" [alt]="image.name" class="w-full h-full object-cover">
+            </div>
+
+            <!-- Overlay informativo -->
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                <div class="flex items-center text-white">
+                    <div class="bg-blue-500 p-1 rounded mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <span class="text-xs font-medium truncate">{{ image.name }}</span>
+                </div>
+                <div class="text-xs text-gray-200 mt-1">Click para ampliar</div>
+            </div>
+        </div>
+    </div>
+</div>
